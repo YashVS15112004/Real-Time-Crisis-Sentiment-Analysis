@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Text Submission with Location</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+      h1 {
+        margin-bottom: 20px;
+      }
+      #submitForm {
+        display: flex;
+        flex-direction: column;
+        width: 300px;
+      }
+      textarea {
+        resize: none;
+        height: 100px;
+        margin-bottom: 10px;
+      }
+      button {
+        padding: 10px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Submit Your Message</h1>
+    <form id="submitForm">
+      <textarea
+        id="textInput"
+        placeholder="Enter your message..."
+        required
+      ></textarea>
+      <button type="button" onclick="submitData()">Submit</button>
+    </form>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    <script>
+      // Function to get user's GPS coordinates and send the data
+      async function submitData() {
+        const userInput = document.getElementById("textInput").value;
+
+        // Get user's current position (latitude and longitude)
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+
+            // Prepare the data
+            const data = {
+              text: userInput,
+              lat: latitude,
+              lng: longitude,
+            };
+
+            // Send data to the Node.js backend (POST request)
+            const response = await fetch(
+              "http://192.168.238.29:3000/api/submissions",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+              }
+            );
+
+            if (response.ok) {
+              alert("Your submission has been saved!");
+              document.getElementById("submitForm").reset(); // Clear form
+            } else {
+              alert("Error submitting the data.");
+            }
+          },
+          (error) => {
+            alert("Error getting location: " + error.message);
+          }
+        );
+      }
+    </script>
+  </body>
+</html>
